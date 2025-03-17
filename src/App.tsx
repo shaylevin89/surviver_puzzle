@@ -178,8 +178,8 @@ function App() {
     const deltaX = touch.clientX - lastMoveRef.current.x;
     const deltaY = touch.clientY - lastMoveRef.current.y;
 
-    // Minimum movement threshold
-    const minMoveDistance = 5;
+    // Increased minimum movement threshold for more controlled movement
+    const minMoveDistance = 15;
 
     // Clear any existing interval
     if (moveIntervalRef.current) {
@@ -191,6 +191,7 @@ function App() {
       if (Math.abs(deltaX) > minMoveDistance) {
         const direction = deltaX > 0 ? 'right' : 'left';
         moveShape(direction);
+        // Update last position only after successful move
         lastMoveRef.current = {
           x: touch.clientX,
           y: touch.clientY
@@ -200,6 +201,7 @@ function App() {
       if (Math.abs(deltaY) > minMoveDistance) {
         const direction = deltaY > 0 ? 'down' : 'up';
         moveShape(direction);
+        // Update last position only after successful move
         lastMoveRef.current = {
           x: touch.clientX,
           y: touch.clientY
