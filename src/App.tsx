@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import './App.css';
 import { Cell, Shape, GameState, ShapeType } from './types';
 
@@ -32,19 +32,30 @@ const createInitialState = (): GameState => {
 function App() {
   const [gameState, setGameState] = useState<GameState>(createInitialState());
   const [selectedShape, setSelectedShape] = useState<ShapeType | null>(null);
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const [time, setTime] = useState(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number; shape: ShapeType | null } | null>(null);
+  const lastMoveRef = useRef<{ x: number; y: number } | null>(null);
+  const moveIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleRestart = useCallback(() => {
     setGameState(createInitialState());
     setSelectedShape(null);
+    setTime(0);
   }, []);
 
-  const handleCellClick = useCallback((cellId: number) => {
-    const cell = gameState.cells[cellId - 1];
-    if (cell.shape) {
-      setSelectedShape(cell.shape);
-    }
-  }, [gameState.cells]);
+  // Add timer effect
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setTime(prevTime => prevTime + 1);
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
 
   const moveShape = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
     if (!selectedShape) return;
@@ -142,70 +153,107 @@ function App() {
 
   const handleTouchStart = useCallback((event: React.TouchEvent) => {
     const touch = event.touches[0];
-    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-  }, []);
+    const target = event.target as HTMLElement;
+    const cellId = parseInt(target.getAttribute('data-cell-id') || '0');
+    const cell = gameState.cells[cellId - 1];
+    
+    if (cell.shape) {
+      setSelectedShape(cell.shape);
+      touchStartRef.current = {
+        x: touch.clientX,
+        y: touch.clientY,
+        shape: cell.shape
+      };
+      lastMoveRef.current = {
+        x: touch.clientX,
+        y: touch.clientY
+      };
+    }
+  }, [gameState.cells]);
 
-  const handleTouchEnd = useCallback((event: React.TouchEvent) => {
-    if (!touchStartRef.current || !selectedShape) return;
+  const handleTouchMove = useCallback((event: React.TouchEvent) => {
+    if (!touchStartRef.current || !selectedShape || !lastMoveRef.current) return;
 
-    const touch = event.changedTouches[0];
-    const deltaX = touch.clientX - touchStartRef.current.x;
-    const deltaY = touch.clientY - touchStartRef.current.y;
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - lastMoveRef.current.x;
+    const deltaY = touch.clientY - lastMoveRef.current.y;
 
-    // Minimum swipe distance threshold
-    const minSwipeDistance = 30;
+    // Minimum movement threshold
+    const minMoveDistance = 5;
 
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (Math.abs(deltaX) > minSwipeDistance) {
-        if (deltaX > 0) {
-          moveShape('right');
-        } else {
-          moveShape('left');
-        }
-      }
-    } else {
-      if (Math.abs(deltaY) > minSwipeDistance) {
-        if (deltaY > 0) {
-          moveShape('down');
-        } else {
-          moveShape('up');
-        }
-      }
+    // Clear any existing interval
+    if (moveIntervalRef.current) {
+      clearInterval(moveIntervalRef.current);
     }
 
-    touchStartRef.current = null;
+    // Determine movement direction and speed
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (Math.abs(deltaX) > minMoveDistance) {
+        const direction = deltaX > 0 ? 'right' : 'left';
+        moveShape(direction);
+        lastMoveRef.current = {
+          x: touch.clientX,
+          y: touch.clientY
+        };
+      }
+    } else {
+      if (Math.abs(deltaY) > minMoveDistance) {
+        const direction = deltaY > 0 ? 'down' : 'up';
+        moveShape(direction);
+        lastMoveRef.current = {
+          x: touch.clientX,
+          y: touch.clientY
+        };
+      }
+    }
   }, [selectedShape, moveShape]);
+
+  const handleTouchEnd = useCallback(() => {
+    touchStartRef.current = null;
+    lastMoveRef.current = null;
+    if (moveIntervalRef.current) {
+      clearInterval(moveIntervalRef.current);
+      moveIntervalRef.current = null;
+    }
+  }, []);
 
   React.useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      if (moveIntervalRef.current) {
+        clearInterval(moveIntervalRef.current);
+      }
+    };
   }, [handleKeyDown]);
+
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
   return (
     <div className="App">
-      <button className="restart-button" onClick={handleRestart}>
-        Restart
-      </button>
+      <div className="controls">
+        <button className="restart-button" onClick={handleRestart}>
+          Restart
+        </button>
+        <div className="timer">{formatTime(time)}</div>
+      </div>
       <div 
         className="board"
         onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         {gameState.cells.map(cell => (
           <div
             key={cell.id}
-            className={`cell ${cell.shape || ''} ${selectedShape === cell.shape ? 'selected' : ''}`}
-            onClick={() => handleCellClick(cell.id)}
+            data-cell-id={cell.id}
+            className={`cell ${cell.shape || ''}`}
           />
         ))}
-      </div>
-      <div className="mobile-controls">
-        <button className="direction-button up" onClick={() => moveShape('up')}>↑</button>
-        <div className="horizontal-controls">
-          <button className="direction-button left" onClick={() => moveShape('left')}>←</button>
-          <button className="direction-button right" onClick={() => moveShape('right')}>→</button>
-        </div>
-        <button className="direction-button down" onClick={() => moveShape('down')}>↓</button>
       </div>
     </div>
   );
