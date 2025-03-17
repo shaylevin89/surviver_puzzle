@@ -2,7 +2,7 @@
   "name": "puzzle",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://shaylevin.github.io/puzzle",
+  "homepage": "https://shaylevin89.github.io/surviver_puzzle",
   "dependencies": {
     "@types/node": "^16.18.0",
     "@types/react": "^18.2.0",
@@ -39,6 +39,6 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^6.1.1"
+    "gh-pages": "^6.3.0"
   }
-} 
+}
