@@ -1,0 +1,144 @@
+.App {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2vw;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.restart-button {
+  margin-bottom: 2vw;
+  padding: 1.5vw 3vw;
+  font-size: clamp(14px, 2vw, 20px);
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  min-width: 120px;
+}
+
+.restart-button:hover {
+  background-color: #45a049;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  gap: 0;
+  padding: 0;
+  touch-action: none;
+  width: min(90vw, 90vh);
+  aspect-ratio: 2/3;
+  max-width: 400px;
+  max-height: 600px;
+  border: 4px solid #333;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cell {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  user-select: none;
+  aspect-ratio: 1;
+}
+
+.cell.selected {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Shape colors */
+.square {
+  background-color: #f44336 !important;
+}
+
+.l1 {
+  background-color: #2196F3 !important;
+}
+
+.l2 {
+  background-color: #4CAF50 !important;
+}
+
+.l3 {
+  background-color: #FFC107 !important;
+}
+
+.l4 {
+  background-color: #9C27B0 !important;
+}
+
+/* Mobile controls */
+.mobile-controls {
+  display: none;
+  margin-top: 2vw;
+  text-align: center;
+  width: min(90vw, 300px);
+}
+
+.direction-button {
+  width: min(15vw, 60px);
+  height: min(15vw, 60px);
+  font-size: clamp(16px, 4vw, 24px);
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  margin: 1vw;
+  cursor: pointer;
+  user-select: none;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.direction-button:active {
+  background-color: #1976D2;
+}
+
+.horizontal-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1vw;
+}
+
+/* Show mobile controls only on mobile devices */
+@media (max-width: 768px) {
+  .mobile-controls {
+    display: block;
+  }
+  
+  .board {
+    width: min(95vw, 95vh);
+    max-width: 350px;
+    max-height: 525px;
+    border-width: 3px;
+  }
+  
+  .direction-button {
+    width: min(20vw, 50px);
+    height: min(20vw, 50px);
+    font-size: clamp(14px, 3vw, 20px);
+  }
+}
+
+/* For very small screens */
+@media (max-width: 320px) {
+  .board {
+    width: 95vw;
+    max-width: 300px;
+    max-height: 450px;
+    border-width: 2px;
+  }
+  
+  .direction-button {
+    width: min(25vw, 40px);
+    height: min(25vw, 40px);
+    font-size: clamp(12px, 2.5vw, 16px);
+  }
+} 
