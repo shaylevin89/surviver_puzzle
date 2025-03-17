@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/surviver_puzzle/static/css/main.a6a8a546.css",
-    "main.js": "/surviver_puzzle/static/js/main.36d11e27.js",
+    "main.js": "/surviver_puzzle/static/js/main.fb6df155.js",
     "index.html": "/surviver_puzzle/index.html",
     "main.a6a8a546.css.map": "/surviver_puzzle/static/css/main.a6a8a546.css.map",
-    "main.36d11e27.js.map": "/surviver_puzzle/static/js/main.36d11e27.js.map"
+    "main.fb6df155.js.map": "/surviver_puzzle/static/js/main.fb6df155.js.map"
   },
   "entrypoints": [
     "static/css/main.a6a8a546.css",
-    "static/js/main.36d11e27.js"
+    "static/js/main.fb6df155.js"
   ]
 }
